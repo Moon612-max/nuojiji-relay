@@ -239,9 +239,9 @@ export async function runProactiveTick(env) {
                 { role: 'user', content: '请开始回复。' },
             ];
 
-            let content = null, error = null;
+            let content = null, reasoning = null, error = null;
             try {
-                content = await runGeneration(rec.aiSettings, messages, rec.aiSettings?.maxTokens || null);
+                ({ content, reasoning } = await runGeneration(rec.aiSettings, messages, rec.aiSettings?.maxTokens || null));
             } catch (e) {
                 error = String(e?.message || e);
             }
@@ -264,7 +264,7 @@ export async function runProactiveTick(env) {
             const item = {
                 id: `relay_${requestId}`, requestId,
                 charId: rec.charId, userId: rec.userId,
-                roundId: requestId, content, error, createdAt: nowMs(),
+                roundId: requestId, content, reasoning: reasoning || null, error, createdAt: nowMs(),
                 proactive: true,
             };
             await outbox.put(rec.inboxId, item);
